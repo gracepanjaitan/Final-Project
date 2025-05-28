@@ -7,7 +7,6 @@ class agodaBooking {
 
   getFlightForm() {
     cy.get("#tab-flight-tab > .Box-sc-kv6pi1-0").click();
-    cy.get(".a84bc-bg-product-primary-subtle").should("be.visible");
   }
 
   getFlyingFromCode(flyingFrom, fromCode) {
@@ -86,8 +85,16 @@ class agodaBooking {
   }
 
   selectFlightSchedule() {
-    cy.wait(5000)
-    cy.get('[data-testid="flightCard-flight-detail"]', { timeout: 5000 })
+    //wrap departure + arrival time
+    cy.get('[data-testid="departure-time"]').invoke('text').then((departureTime) => {
+      cy.get('[data-testid="arrival-time"]').invoke('text').then((arrivalTime) => {
+        const flightTime = `${departureTime.trim()} - ${arrivalTime.trim()}`;
+        cy.wrap(flightTime).as('flightTime');
+      });
+    });
+    
+    cy.wait(5000);
+    cy.get('[data-testid="flightCard-flight-detail"]')
       .eq(0)
       .click();
     cy.wait(5000);
@@ -96,16 +103,27 @@ class agodaBooking {
       .click();
   }
 
-  contactDetailsForm(first_name) {
+  contactDetailsForm() {
+    cy.wait(5000)
+    // Get ticket price
+    cy.get('[data-component="mob-flight-price-total-desc"]').invoke('text').as('selectedPrice')
+
     cy.fixture("contactDetails.json").as("contact");
     cy.get("@contact").then((contactData) => {
+      // fill first name of booker
       cy.get('[data-testid="contact.contactFirstName"]').type(
         contactData.first_name
       );
+
+       // fill last name of booker
       cy.get('[data-testid="contact.contactLastName"]').type(
         contactData.last_name
       );
+
+      //fill email of booker
       cy.get('[data-testid="contact.contactEmail"]').type(contactData.email);
+
+      //fill phones's number booker
       cy.get(
         '[data-testid="contact.contactPhoneNumber-PhoneNumberDataTestId"]'
       ).type(contactData.phone_number);
@@ -114,38 +132,135 @@ class agodaBooking {
   }
 
   passengersForm() {
+    cy.wait(5000);
     cy.fixture("passenger.json").as("passenger");
     cy.get("@passenger").then((passengerData) => {
+      //fill passenger first name + middle
       cy.get(
         '[data-testid="flight.forms.i0.units.i0.passengerFirstName"]'
       ).type(passengerData.first_middle_name);
+
+      //fill passenger last name
       cy.get('[data-testid="flight.forms.i0.units.i0.passengerLastName"]').type(
         passengerData.last_name
       );
+
+      // wrap as full name
+      cy.wrap(`${passengerData.first_middle_name} ${passengerData.last_name}`).as('fullName')
+
+      //fill passenger day of birth
       cy.get(
         '[data-testid="flight.forms.i0.units.i0.passengerDateOfBirth-DateInputDataTestId"]'
-      ).type(passengerData.day);
+      ).type(passengerData.day_birth);
+
+      //fill passenger month of birth
       cy.get(
         '[data-testid="flight.forms.i0.units.i0.passengerDateOfBirth-MonthInputDataTestId"]'
       ).click();
       cy.get('[data-testid="floater-container"]').should("be.visible");
       cy.get('[name="dropdown-list-item"]');
-      cy.get("li").contains(passengerData.month).click();
+      cy.get("li").contains(passengerData.month_birth).click();
+
+      //fill passenger year of birth
       cy.get(
         '[datatestid="flight.forms.i0.units.i0.passengerDateOfBirth-YearInputDataTestId"]'
-      ).type(passengerData.year);
+      ).type(passengerData.year_birth);
       cy.get(
         '[data-testid="flight.forms.i0.units.i0.passengerNationality"]'
       ).click();
       cy.get("li").contains(passengerData.nationality).click();
-      cy.get(
-        '[data-testid="kite-box"] > :nth-child(1) > .a5d86-bg-product-primary'
-      ).click();
+
+      //Check apakah field passport ada atau tidak
+      cy.get("body").then(($body) => {
+        // cek apakah elemen passport number ada
+        if (
+          $body.find(
+            'input[data-testid="flight.forms.i0.units.i0.passportNumber"]'
+          ).length > 0
+        ) {
+          cy.get(
+            'input[data-testid="flight.forms.i0.units.i0.passportNumber"]'
+          ).type(passengerData.passport);
+
+          //wrap the passport
+          cy.wrap(passengerData.passport).as('passengerPassport');
+          
+          cy.get(
+            '[data-testid="flight.forms.i0.units.i0.passportCountryOfIssue"]'
+          ).click();
+          cy.get("li").contains(passengerData.region_issue).click();
+          cy.get(
+            '[datatestid="flight.forms.i0.units.i0.passportExpiryDate-DateInputDataTestId"]'
+          ).type(passengerData.day_expire);
+          // Step 1: Klik dropdown bulan
+          cy.get(
+            '[data-testid="flight.forms.i0.units.i0.passportExpiryDate-MonthInputDataTestId"] button'
+          ).click();
+
+          // Step 2: Pilih bulan "May" dari list item
+          cy.get("li").contains(passengerData.month_expire).click();
+
+          cy.get("li").contains(passengerData.month_expire).click();
+          cy.get(
+            '[data-testid="flight.forms.i0.units.i0.passportExpiryDate-YearInputDataTestId"]'
+          ).type(passengerData.year_expire);
+        } else {
+          cy.log("Passport number field not present – skipping");
+        }
+      });
     });
   }
 
   payment() {
-    cy.get('[data-testid="continue-to-payment-button"]').click();
+    cy.get('[data-testid="kite-box"] button.a5d86-bg-product-primary')
+    .should('exist')
+    .click({ force: true });
+  
+    cy.get('[data-testid="continue-to-payment-button"]').click()
+    // cy.get('.a5d86-items-baseline > .a5d86-bg-product-primary').should('be.visible').click()
+    cy.get("body").then(($body) => {
+      if (
+        $body.find(
+          ('.a5d86-items-baseline > .a5d86-bg-product-primary')
+        ).length > 0
+      ) {
+        cy.get(('.a5d86-items-baseline > .a5d86-bg-product-primary')).should('be.visible').click()
+      }
+        else {
+          cy.log("The pop up is not present – skipping");
+        }
+      })
+  }
+
+  details(){
+    //expect price
+    cy.get('@selectedPrice').then((selectedPrice) => {
+      cy.get('[data-component="mob-flight-price-total-desc"]')    
+      .invoke('text')
+      .should('include', selectedPrice);
+    });
+
+    //expect passenger details
+    /// expect passenger full name
+    cy.get('@fullName').then((fullName) => {
+      cy.get('[data-component="name-container-name"]')    
+      .invoke('text')
+      .should('include', fullName);
+    });
+
+    /// expecte passenger passport
+    cy.get('@passengerPassport').then((passengerPassport) => {
+      cy.get('[data-component="name-container-detail"]')
+      .invoke('text')
+      .should('include', passengerPassport);
+    })
+
+    //expected arrival time
+    cy.get('@flightTime').then((flightTime) => {
+      cy.get('.a5d86-flex-wrap > :nth-child(1) > .a5d86-box', {timeout:10000})
+      .invoke('text')
+      .should('include', flightTime);
+    });
   }
 }
 

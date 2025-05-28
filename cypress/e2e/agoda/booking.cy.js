@@ -19,5 +19,6 @@ describe("Booking ticket on Agoda", () => {
     agodaBooking.contactDetailsForm()
     agodaBooking.passengersForm()
     agodaBooking.payment()
+    agodaBooking.details()
   });
 });

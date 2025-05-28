@@ -1,8 +1,14 @@
 {
     "first_middle_name":"Jhon Sebastian",
     "last_name": "Doe",
-    "day": 18,
-    "month": "May",
-    "year": "2000",
-    "nationality": "Indonesia"
+    "day_birth": 18,
+    "month_birth": "May",
+    "year_birth": "2000",
+    "nationality": "Indonesia",
+    "passport":9601796,
+    "region_issue": "Indonesia",
+    "day_expire": 18,
+    "month_expire": "June",
+    "year_expire": 2026
+
 }
