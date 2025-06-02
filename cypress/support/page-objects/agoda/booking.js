@@ -275,19 +275,6 @@ class agodaBooking {
     });
 
     //expected arrival time
-    // cy.get('[data-testid="departure-time"]')
-    //   .invoke("text")
-    //   .then((depTime) => {
-    //     cy.get('[data-testid="arrival-time"]')
-    //       .invoke("text")
-    //       .then((arrTime) => {
-    //         const currentTime = `${depTime.trim()} - ${arrTime.trim()}`;
-
-    //         cy.get("@selectedFlightTime").then((flightTime) => {
-    //           expect(currentTime).to.eq(flightTime);
-    //         });
-    //       });
-    //   });
     cy.get('@departureTime').then((departureTime) => {
       cy.get('[data-component="mob-flight-segment-departure"]').should('contain', departureTime);
     });
