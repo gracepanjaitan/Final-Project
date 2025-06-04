@@ -6,7 +6,7 @@ describe('Searching Youtube', () => {
     cy.wait(10000)
     searchYoutube.trendingButton();
     searchYoutube.movieButton();
-    searchYoutube.movieTrending()
+    searchYoutube.movieTrending();
     searchYoutube.movieDetail();
   })
 });
