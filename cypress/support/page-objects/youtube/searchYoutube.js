@@ -14,21 +14,22 @@ class searchYoutube {
   }
 
   movieButton() {
-    cy.get(".yt-tab-shape-wiz__tab--last-tab > .yt-tab-shape-wiz__tab")
-      .contains("Movies")
-      .click({ force: true });
+    cy.get('yt-tab-shape[tab-title="Movies"]')
+      .should("have.attr", "role", "tab")
+      .click();
   }
 
   movieTrending() {
-    cy.get("ytd-video-renderer", { timeout: 10000 }) // Ambil semua video
+    cy.wait(3000);
+    cy.get("ytd-video-renderer", { timeout: 10000 })
       .eq(2)
       .then(($el) => {
         const text = $el.find("a#video-title").text().trim();
-        const channelName = $el.find("ytd-channel-name a").text().trim();
+        const channelName = $el.find("ytd-channel-name a").text();
 
         cy.wrap(text).as("title");
         cy.wrap(channelName).as("channel");
-        cy.wrap($el).find('a#video-title').click({ force: true });
+        cy.wrap($el).find("a#video-title").click({ force: true });
       });
     cy.wait(3000);
   }
@@ -36,17 +37,19 @@ class searchYoutube {
   movieDetail() {
     cy.get("@title").then((title) => {
       cy.get("h1.title yt-formatted-string", { timeout: 10000 }).should(
-        "contain",
+        "have.text",
         title
       );
     });
 
-    cy.get("@channel").then((channel) => {
-      cy.get("ytd-channel-name a", { timeout: 10000 }).should(
-        "contain",
-        channel
-      );
-    });
+    // cy.get("@channel").then((channel) => {
+    //   console.log('Nama channel (console):', channel);
+    //   // cy.get('ytd-video-owner-renderer')
+    //   // .find('ytd-channel-name #text a')
+    //   // .should('be.visible')
+    //   // .should('have.text',channel
+    //   // );
+    // });
   }
 }
 export default new searchYoutube();

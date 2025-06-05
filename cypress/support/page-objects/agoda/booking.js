@@ -88,18 +88,6 @@ class agodaBooking {
     cy.wait(5000);
     cy.get('[data-testid="flightCard-flight-detail"]').eq(0).click();
 
-    //wrap departure + arrival time
-    // cy.get('[data-testid="departure-time"]')
-    //   .invoke("text")
-    //   .then((departureTime) => {
-    //     cy.get('[data-testid="arrival-time"]')
-    //       .invoke("text")
-    //       .then((arrivalTime) => {
-    //         const flightTime = `${departureTime.trim()} - ${arrivalTime.trim()}`;
-    //         cy.wrap(flightTime).as("flightTime");
-    //       });
-    //   });
-
     cy.get('[data-testid="departure-time"]').invoke("text").as('departureTime')
     cy.get('[data-testid="arrival-time"]').invoke('text').as('arrivalTime')
 
@@ -211,8 +199,6 @@ class agodaBooking {
 
           // Step 2: Pilih bulan "May" dari list item
           cy.get("li").contains(passengerData.month_expire).click();
-
-          cy.get("li").contains(passengerData.month_expire).click();
           cy.get(
             '[data-testid="flight.forms.i0.units.i0.passportExpiryDate-YearInputDataTestId"]'
           ).type(passengerData.year_expire);
@@ -224,18 +210,17 @@ class agodaBooking {
   }
 
   payment() {
-    cy.get('[data-testid="kite-box"] button.a5d86-bg-product-primary')
-      .should("exist")
+    cy.get('[data-component="flight-continue-to-addOns-button"]')
+      .should('be.visible')
       .click({ force: true });
 
     cy.get('[data-testid="continue-to-payment-button"]').click();
-    // cy.get('.a5d86-items-baseline > .a5d86-bg-product-primary').should('be.visible').click()
     cy.get("body").then(($body) => {
       if (
-        $body.find(".a5d86-items-baseline > .a5d86-bg-product-primary").length >
+        $body.find("[data-component='last-chance-accept-button']").length >
         0
       ) {
-        cy.get(".a5d86-items-baseline > .a5d86-bg-product-primary")
+        cy.get("[data-component='last-chance-accept-button']")
           .should("be.visible")
           .click();
       } else {
